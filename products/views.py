@@ -1,8 +1,10 @@
 from django.shortcuts import render
-from rest_framework import viewsets, generics
+from rest_framework import viewsets, generics, status
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Product
+from django.core.cache import cache
 
 import products
 from products.ProductSerializer import ProductSerializer
@@ -30,3 +32,22 @@ class ProductViewSet(APIView):
         serializer = ProductSerializer(paginated_query, many=True)
 
         return paginator.get_paginated_response(serializer.data)
+
+    def get(self, request):
+        product_id = self.request.query_params.get('product_id', None)
+        if product_id:
+            cache_key = 'product:{}'.format(product_id)
+            data = cache.get(cache_key)
+            if data:
+                return Response(data, status=status.HTTP_200_OK)
+            try:
+                product = Product.objects.get(id=product_id)
+                data = ProductSerializer(product).data
+                cache.set(cache_key, data)
+                return Response(data, status=status.HTTP_200_OK)
+            except Product.DoesNotExist:
+                return Response('Product not found', status=status.HTTP_404_NOT_FOUND)
+
+        return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
