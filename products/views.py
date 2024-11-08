@@ -13,8 +13,8 @@ from products.ProductSerializer import ProductSerializer
 # Create your views here.
 
 class ProductPagination(PageNumberPagination):
-    page_size = 2  # defualt is 2
-    page_size_query_param = 'page_size'  #if you want to change default
+    page_size = 2  # default is 2
+    page_size_query_param = 'page_size'  # if you want to change default
 
 
 class ProductViewSet(APIView):
@@ -51,3 +51,8 @@ class ProductViewSet(APIView):
         return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+# TODO: HW
+#  Create order service that will take product ids,
+#  CALL PRODUCT SERVICE GET THE AMOUNT,
+#  CALL PAYMENT TO GENERATE PAYMENT LINK
+#  RETURN BACK TO POSTMAN
